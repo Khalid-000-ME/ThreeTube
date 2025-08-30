@@ -173,7 +173,9 @@ console.log("Pinned file available at:", gatewayUrl);
             <Button onClick={resetForm} variant="outline" className="flex-1 bg-transparent">
               Upload Another Video
             </Button>
-            <Button className="flex-1">View Video</Button>
+            <a href={`https://${PINATA_GATEWAY}/ipfs/${CID}`}>
+              <Button className="flex-1">View Video</Button>
+            </a>
           </div>
         </CardContent>
       </Card>
