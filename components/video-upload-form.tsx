@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import dotenv from "dotenv";
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle, Coins, Shield } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PinataSDK } from "pinata";
+
+dotenv.config();
 
 interface UploadProgress {
   stage: "idle" | "uploading" | "processing" | "minting" | "complete" | "error"
@@ -56,7 +59,7 @@ export function VideoUploadForm() {
     if (file && file.type.startsWith("video/")) {
       setSelectedFile(file)
       setUploadProgress({ stage: "idle", progress: 0, message: "" });
-      const upload = await pinata.upload.file(file);
+      const upload = await pinata.upload.public.file(file);
       setCID(upload.cid);
       const gatewayUrl = `https://${PINATA_GATEWAY}/ipfs/${CID}`;
 console.log("Pinned file available at:", gatewayUrl);
