@@ -2,7 +2,6 @@
 
 import type React from "react"
 
-import dotenv from "dotenv";
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,8 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle, Coins, Shield } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PinataSDK } from "pinata";
-
-dotenv.config();
 
 interface UploadProgress {
   stage: "idle" | "uploading" | "processing" | "minting" | "complete" | "error"
