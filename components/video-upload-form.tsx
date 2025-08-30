@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle, Coins, Shield } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { PinataSDK } from "pinata";
 
 interface UploadProgress {
   stage: "idle" | "uploading" | "processing" | "minting" | "complete" | "error"
@@ -20,8 +21,16 @@ interface UploadProgress {
   message: string
 }
 
+const PINATA_GATEWAY = process.env.NEXT_PUBLIC_PINATA_GATEWAY!;
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!, // make sure to expose via NEXT_PUBLIC
+  pinataGateway: PINATA_GATEWAY,
+});
+
 export function VideoUploadForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [CID, setCID] = useState('');
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
     stage: "idle",
     progress: 0,
@@ -42,11 +51,15 @@ export function VideoUploadForm() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file && file.type.startsWith("video/")) {
       setSelectedFile(file)
-      setUploadProgress({ stage: "idle", progress: 0, message: "" })
+      setUploadProgress({ stage: "idle", progress: 0, message: "" });
+      const upload = await pinata.upload.file(file);
+      setCID(upload.cid);
+      const gatewayUrl = `https://${PINATA_GATEWAY}/ipfs/${CID}`;
+console.log("Pinned file available at:", gatewayUrl);
     } else {
       alert("Please select a valid video file")
     }
@@ -59,7 +72,7 @@ export function VideoUploadForm() {
     }
   }
 
-  const simulateIPFSUpload = async () => {
+  const IPFSUpload = async (CID: string) => {
     // Simulate IPFS upload process
     setUploadProgress({ stage: "uploading", progress: 10, message: "Uploading to IPFS..." })
     await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -71,8 +84,7 @@ export function VideoUploadForm() {
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Mock IPFS hash
-    const mockHash = `QmX${Math.random().toString(36).substring(2, 15)}`
-    setIpfsHash(mockHash)
+    setIpfsHash(CID);
 
     setUploadProgress({ stage: "minting", progress: 85, message: "Minting NFT..." })
     await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -98,7 +110,7 @@ export function VideoUploadForm() {
     }
 
     try {
-      await simulateIPFSUpload()
+      await IPFSUpload(CID)
     } catch (error) {
       setUploadProgress({
         stage: "error",
